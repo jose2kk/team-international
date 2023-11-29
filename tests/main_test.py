@@ -5,11 +5,18 @@ import pytest
 from challenge import main
 
 
-def test_data_capture__add_method(
+def test_data_capture__add_method__ok(
     data_capture: main.DataCapture,
 ):
     assert data_capture._repository
     assert data_capture._max_value == 9
+
+
+def test_data_capture__add_method__not_an_integer_error(
+    data_capture: main.DataCapture,
+):
+    with pytest.raises(main.NotAnIntegerError):
+        data_capture.add(3.1)
 
 
 def test_data_capture__build_stats(

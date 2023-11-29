@@ -4,6 +4,10 @@ from collections import defaultdict
 from typing import List
 
 
+class NotAnIntegerError(Exception):
+    """Exception raised when an input value is not integer."""
+
+
 class Stats:
     """Stats."""
 
@@ -45,22 +49,27 @@ class DataCapture:
         self._max_value = -1
 
     def add(self, val: int) -> None:
+        """Receive a number and add it to the repository."""
+        if not isinstance(val, int):
+            raise NotAnIntegerError(f"Input value {val} is not an integer.")
+
         self._repository[val] += 1
-        self._max_value = max(self._max_value, val)
+        self._max_value = val if val > self._max_value else self._max_value
 
     def build_stats(self) -> Stats:
+        """Calculate stats lists and returns Stats object."""
+
         less_list = [0] * (self._max_value + 2)
         greater_list = [0] * (self._max_value + 2)
 
         for i in range(1, self._max_value + 2):
             less_list[i] = self._repository[i-1] + less_list[i-1]
+            greater_list[self._max_value + 1 - i] = (
+                self._repository[self._max_value + 2 - i] + greater_list[self._max_value + 2 - i]
+                if i <= self._max_value else 0
+            )
 
-        for i in range(self._max_value, -1, -1):
-            greater_list[i] = self._repository[i+1] + greater_list[i+1] if i <= self._max_value else 0
-
-        # print(less_list)
-        # print(greater_list)
-        # print(self._max_value)
+        greater_list[0] = greater_list[1]
 
         return Stats(
             max_value=self._max_value,
