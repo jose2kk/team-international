@@ -8,6 +8,17 @@ class NotAnIntegerError(Exception):
     """Exception raised when an input value is not integer."""
 
 
+class InputOutOfRangeError(Exception):
+    """EXception raised when input value is out of range."""
+
+
+def validate_input(val) -> None:
+    """Validates whether the input is between 1 and 1000 (both inclusive)."""
+    if val < 1 or val > 1000:
+        raise InputOutOfRangeError
+    return None
+
+
 class Stats:
     """Stats."""
 
@@ -24,6 +35,7 @@ class Stats:
         self._repository = repository
 
     def less(self, val: int) -> int:
+        validate_input(val)
         if val < 1:
             return 0
         elif val > self._max_value:
@@ -31,13 +43,17 @@ class Stats:
         return self._less_list[val]
 
     def greater(self, val: int) -> int:
+        validate_input(val)
         if val >= self._max_value:
             return 0
         elif val < 1:
             return self._greater_list[0]
-        return self._greater_list[val]
+        return self._greater_list[val - 1]
 
     def between(self, left: int, right: int) -> int:
+        validate_input(left) and validate_input(right)
+        if left > right:
+            return 0
         return self.less(val=right) - self.less(val=left) + self._repository[right]
 
 
@@ -52,6 +68,8 @@ class DataCapture:
         """Receive a number and add it to the repository."""
         if not isinstance(val, int):
             raise NotAnIntegerError(f"Input value {val} is not an integer.")
+
+        validate_input(val)
 
         self._repository[val] += 1
         self._max_value = val if val > self._max_value else self._max_value
@@ -69,12 +87,10 @@ class DataCapture:
                 if i <= self._max_value else 0
             )
 
-        greater_list[0] = greater_list[1]
-
         return Stats(
             max_value=self._max_value,
             less_list=less_list,
-            greater_list=greater_list,
+            greater_list=greater_list[1:],
             repository=self._repository,
         )
 
